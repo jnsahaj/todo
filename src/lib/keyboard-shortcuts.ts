@@ -12,12 +12,20 @@ class KeyboardShortcutsManager {
   private shortcuts: Map<string, Shortcut> = new Map();
   private pressedKeys: Set<string> = new Set();
   private isMac: boolean;
+  private initialized: boolean = false;
 
   constructor() {
     this.isMac =
       typeof window !== "undefined" &&
       /Mac|iPod|iPhone|iPad/.test(window.navigator.platform);
+  }
+
+  public init() {
+    if (this.initialized || typeof window === "undefined") {
+      return;
+    }
     this.initializeEventListeners();
+    this.initialized = true;
   }
 
   private initializeEventListeners() {

@@ -19,20 +19,10 @@ export default function Home() {
   const addTodoFormRef = useRef<{ focus: () => void }>(null);
   const [focusedIndex, setFocusedIndex] = useState(-1);
 
-  // Request notification permission on mount
   useEffect(() => {
-    if (typeof window !== "undefined" && "Notification" in window) {
-      Notification.requestPermission().then((permission) => {
-        if (permission === "granted") {
-          console.log("Notification permission granted.");
-        } else {
-          console.log("Notification permission denied.");
-        }
-      });
-    }
-  }, []);
+    // Initialize listeners on mount
+    keyboardShortcuts.init();
 
-  useEffect(() => {
     keyboardShortcuts.registerShortcut("focus-todo-input", {
       key: "k",
       modifiers: ["Meta"],

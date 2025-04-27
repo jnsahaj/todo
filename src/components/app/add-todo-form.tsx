@@ -101,32 +101,35 @@ export const AddTodoForm = forwardRef<{ focus: () => void }, AddTodoFormProps>(
         ? format(finalDate, "yyyy-MM-dd")
         : undefined;
 
-      // Schedule notification if date and time are set and in the future
+      // Schedule notification via Service Worker if date and time are set and in the future
       if (formattedDate && finalTime && finalDate) {
         const notificationDateTime = new Date(`${formattedDate}T${finalTime}`);
         const now = new Date();
 
-        if (notificationDateTime > now) {
-          const delay = notificationDateTime.getTime() - now.getTime();
+        if (notificationDateTime > now && navigator.serviceWorker.controller) {
+          const timestamp = notificationDateTime.getTime();
+          const title = "Todo Reminder";
+          const options = {
+            body: finalText,
+            icon: "/favicon.ico", // Optional
+          };
+
           console.log(
-            `Scheduling notification for: ${notificationDateTime} (in ${delay}ms)`
+            `Form: Sending message to SW to schedule notification for: ${notificationDateTime}`
           );
 
-          setTimeout(() => {
-            if (Notification.permission === "granted") {
-              new Notification("Todo Reminder", {
-                body: finalText,
-                icon: "/favicon.ico", // Optional: use your app's icon
-              });
-            } else {
-              console.log(
-                "Notification permission not granted, cannot show reminder."
-              );
-            }
-          }, delay);
-        } else {
+          navigator.serviceWorker.controller.postMessage({
+            title,
+            options,
+            timestamp,
+          });
+        } else if (notificationDateTime <= now) {
           console.log(
             "Scheduled time is in the past, not setting notification."
+          );
+        } else if (!navigator.serviceWorker.controller) {
+          console.warn(
+            "Service worker controller not available, cannot send notification message."
           );
         }
       }
