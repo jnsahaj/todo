@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Minimal Todo App",
-  description: "A simple todo application built with Next.js and Zustand",
+  title: "todo.iamsahaj.xyz",
+  description: "A hyper-minimal, keyboard-driven, local-only todo app",
 };
 
 export default function RootLayout({
