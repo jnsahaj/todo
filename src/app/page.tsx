@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useTodoStore } from "@/store/todo-store";
 import { AddTodoForm } from "@/components/app/add-todo-form";
 import { TodoList } from "@/components/app/todo-list";
@@ -11,6 +11,19 @@ export default function Home() {
   const toggleTodo = useTodoStore((state) => state.toggleTodo);
   const removeTodo = useTodoStore((state) => state.removeTodo);
   const editTodo = useTodoStore((state) => state.editTodo);
+
+  // Request notification permission on mount
+  useEffect(() => {
+    if (typeof window !== "undefined" && "Notification" in window) {
+      Notification.requestPermission().then((permission) => {
+        if (permission === "granted") {
+          console.log("Notification permission granted.");
+        } else {
+          console.log("Notification permission denied.");
+        }
+      });
+    }
+  }, []);
 
   return (
     <main className="container mx-auto max-w-xl h-screen flex flex-col">

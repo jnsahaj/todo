@@ -88,6 +88,35 @@ export function AddTodoForm({ onAdd }: AddTodoFormProps) {
     const formattedDate = finalDate
       ? format(finalDate, "yyyy-MM-dd")
       : undefined;
+
+    // Schedule notification if date and time are set and in the future
+    if (formattedDate && finalTime && finalDate) {
+      const notificationDateTime = new Date(`${formattedDate}T${finalTime}`);
+      const now = new Date();
+
+      if (notificationDateTime > now) {
+        const delay = notificationDateTime.getTime() - now.getTime();
+        console.log(
+          `Scheduling notification for: ${notificationDateTime} (in ${delay}ms)`
+        );
+
+        setTimeout(() => {
+          if (Notification.permission === "granted") {
+            new Notification("Todo Reminder", {
+              body: finalText,
+              icon: "/favicon.ico", // Optional: use your app's icon
+            });
+          } else {
+            console.log(
+              "Notification permission not granted, cannot show reminder."
+            );
+          }
+        }, delay);
+      } else {
+        console.log("Scheduled time is in the past, not setting notification.");
+      }
+    }
+
     onAdd(finalText, formattedDate, finalTime);
 
     setText("");
@@ -112,6 +141,15 @@ export function AddTodoForm({ onAdd }: AddTodoFormProps) {
   const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUserInteractedWithPickers(true);
     setTime(e.target.value);
+  };
+
+  // Added handleKeyDown for Shift+Enter submit
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault(); // Prevent default Enter behavior (new line)
+      handleSubmit(e as unknown as React.FormEvent); // Trigger form submission
+    }
+    // Allow Shift+Enter for new line (default behavior)
   };
 
   const handleContentChange = (e: React.FormEvent<HTMLDivElement>) => {
@@ -243,8 +281,12 @@ export function AddTodoForm({ onAdd }: AddTodoFormProps) {
           </div>
         </div>
 
-        {(parsedChronoResult || date) && (
-          <div className="flex flex-wrap gap-2">
+        {(parsedChronoResult ||
+          (date && time) ||
+          (date && !time) ||
+          (!date && time)) && (
+          <div className="flex flex-wrap gap-2 items-center text-xs text-muted-foreground">
+            <span>Set for:</span>
             {parsedChronoResult && (
               <Badge variant="outline" className="text-xs">
                 Detected: {parsedChronoResult.text}
