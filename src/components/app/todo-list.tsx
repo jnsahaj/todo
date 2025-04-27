@@ -30,6 +30,7 @@ export function TodoList({
   const activeTodos = todos.filter((todo) => !todo.completed);
   const completedTodos = todos.filter((todo) => todo.completed);
   const [isAccordionOpen, setIsAccordionOpen] = useState(true); // Track accordion state
+  const containerRef = useRef<HTMLDivElement>(null); // Ref for the main list container
 
   // Combine active and potentially visible completed todos
   const visibleTodos = [
@@ -94,6 +95,43 @@ export function TodoList({
     };
   }, [visibleTodos.length, setFocusedIndex]); // Add setFocusedIndex to dependencies
 
+  // Effect to handle clicks outside focused item
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (focusedIndex === -1) return; // No item focused
+
+      const focusedItemRef = itemRefs.current[focusedIndex];
+
+      // Check if the click is outside the focused item's div
+      if (
+        focusedItemRef?.current &&
+        !focusedItemRef.current.contains(event.target as Node)
+      ) {
+        // Also check if the click is outside the accordion trigger if the focused item is completed
+        const accordionTrigger = containerRef.current?.querySelector(
+          '[data-radix-accordion-trigger][value="completed"]'
+        );
+        if (
+          !accordionTrigger ||
+          !accordionTrigger.contains(event.target as Node)
+        ) {
+          // Check if click is inside the AddTodoForm
+          const addTodoForm = document
+            .getElementById("todo-input")
+            ?.closest("form");
+          if (!addTodoForm || !addTodoForm.contains(event.target as Node)) {
+            setFocusedIndex(-1); // Clicked outside, unfocus
+          }
+        }
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [focusedIndex, setFocusedIndex, visibleTodos.length]); // Re-run if focus changes or list length changes
+
   // Function to handle focus request from child
   const handleFocusRequest = (index: number) => {
     if (itemRefs.current[index]?.current) {
@@ -111,7 +149,7 @@ export function TodoList({
 
   return (
     <ScrollArea className="h-full -mr-4 pr-4">
-      <div className="space-y-0">
+      <div className="space-y-0" ref={containerRef}>
         {/* Active todos */}
         {activeTodos.map((todo, index) => (
           <TodoItem
