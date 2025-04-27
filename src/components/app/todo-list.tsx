@@ -178,7 +178,7 @@ export function TodoList({
             onValueChange={(value) => setIsAccordionOpen(value === "completed")}
           >
             <AccordionItem value="completed">
-              <AccordionTrigger className="text-sm text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring/30 rounded-lg px-4">
+              <AccordionTrigger className="text-sm font-medium text-muted-foreground rounded-lg px-4 bg-muted/20 hover:bg-muted/30 transition-colors duration-200 [&>svg]:size-4 [&>svg]:text-muted-foreground mb-2">
                 Completed ({completedTodos.length})
               </AccordionTrigger>
               <AccordionContent>

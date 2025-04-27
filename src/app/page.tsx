@@ -52,8 +52,10 @@ export default function Home() {
   return (
     <div className="flex flex-col h-screen">
       <header className="w-full flex items-center justify-between pb-1 pt-2 px-2">
-        <div className="w-8" />
-        <h1 className="text-lg font-semibold text-center flex-1">Tasks</h1>
+        <div className="w-4" />
+        <h1 className="text-lg flex-1">
+          todo.<span className="text-muted-foreground">iamsahaj.xyz</span>
+        </h1>
         <div className="flex items-center gap-0">
           <Link href="https://github.com/jnsahaj/todo" target="_blank">
             <Button variant="ghost" size="icon">
