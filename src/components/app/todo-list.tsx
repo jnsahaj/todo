@@ -149,19 +149,23 @@ export function TodoList({
 
   return (
     <ScrollArea className="h-full -mr-4 pr-4">
-      <div className="space-y-0" ref={containerRef}>
+      <div className="space-y-2" ref={containerRef}>
         {/* Active todos */}
         {activeTodos.map((todo, index) => (
-          <TodoItem
-            key={todo.id}
-            ref={itemRefs.current[index]} // Assign ref
-            todo={todo}
-            onToggle={onToggle}
-            onRemove={onRemove}
-            onEdit={onEdit}
-            isFocused={focusedIndex === index} // Pass focus state
-            onFocusRequested={() => handleFocusRequest(index)} // Handle click focus
-          />
+          <React.Fragment key={todo.id}>
+            <TodoItem
+              ref={itemRefs.current[index]}
+              todo={todo}
+              onToggle={onToggle}
+              onRemove={onRemove}
+              onEdit={onEdit}
+              isFocused={focusedIndex === index}
+              onFocusRequested={() => handleFocusRequest(index)}
+            />
+            {index < activeTodos.length - 1 && (
+              <div className="h-px bg-border/50 mx-4" />
+            )}
+          </React.Fragment>
         ))}
 
         {/* Completed todos in accordion */}
@@ -171,28 +175,36 @@ export function TodoList({
             collapsible
             className="w-full"
             defaultValue="completed"
-            onValueChange={(value) => setIsAccordionOpen(value === "completed")} // Update accordion state
+            onValueChange={(value) => setIsAccordionOpen(value === "completed")}
           >
             <AccordionItem value="completed">
-              <AccordionTrigger className="text-sm text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring/30 rounded-sm -mx-1 px-1">
+              <AccordionTrigger className="text-sm text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring/30 rounded-lg px-4">
                 Completed ({completedTodos.length})
               </AccordionTrigger>
               <AccordionContent>
-                {completedTodos.map((todo, index) => {
-                  const overallIndex = completedTodoStartIndex + index;
-                  return (
-                    <TodoItem
-                      key={todo.id}
-                      ref={itemRefs.current[overallIndex]} // Assign ref
-                      todo={todo}
-                      onToggle={onToggle}
-                      onRemove={onRemove}
-                      onEdit={onEdit}
-                      isFocused={focusedIndex === overallIndex} // Pass focus state
-                      onFocusRequested={() => handleFocusRequest(overallIndex)} // Handle click focus
-                    />
-                  );
-                })}
+                <div className="space-y-2">
+                  {completedTodos.map((todo, index) => {
+                    const overallIndex = completedTodoStartIndex + index;
+                    return (
+                      <React.Fragment key={todo.id}>
+                        <TodoItem
+                          ref={itemRefs.current[overallIndex]}
+                          todo={todo}
+                          onToggle={onToggle}
+                          onRemove={onRemove}
+                          onEdit={onEdit}
+                          isFocused={focusedIndex === overallIndex}
+                          onFocusRequested={() =>
+                            handleFocusRequest(overallIndex)
+                          }
+                        />
+                        {index < completedTodos.length - 1 && (
+                          <div className="h-px bg-border/50 mx-4" />
+                        )}
+                      </React.Fragment>
+                    );
+                  })}
+                </div>
               </AccordionContent>
             </AccordionItem>
           </Accordion>

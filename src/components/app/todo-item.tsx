@@ -54,9 +54,7 @@ export const TodoItem = forwardRef<HTMLDivElement, TodoItemProps>(
         // Register edit shortcut
         keyboardShortcuts.registerShortcut(editShortcutId, {
           key: "e",
-          action: () => {
-            setIsEditing(true);
-          },
+          action: () => setIsEditing(true),
           description: `Edit ${todo.text}`,
         });
 
@@ -116,11 +114,12 @@ export const TodoItem = forwardRef<HTMLDivElement, TodoItemProps>(
     return (
       <div
         ref={ref}
-        tabIndex={-1} // Make it focusable
-        onClick={onFocusRequested} // Request focus on click
+        tabIndex={-1}
+        onClick={onFocusRequested}
         className={cn(
-          "group flex flex-col gap-1 py-3 border-b border-border last:border-0 focus:outline-none rounded-sm -mx-1 px-4", // Basic focus styles
-          isFocused && "bg-muted/50" // Highlight when programmatically focused
+          "group relative flex flex-col gap-1.5 py-3 focus:outline-none rounded-lg px-4 transition-colors duration-200",
+          isFocused && "bg-muted/30",
+          "hover:bg-muted/20"
         )}
       >
         <div className="flex items-center gap-3">
@@ -131,7 +130,7 @@ export const TodoItem = forwardRef<HTMLDivElement, TodoItemProps>(
             aria-label={`Mark ${todo.text} as ${
               todo.completed ? "incomplete" : "complete"
             }`}
-            className="rounded-full"
+            className="rounded-full transition-transform hover:scale-110"
           />
           {isEditing ? (
             <Input
@@ -139,19 +138,18 @@ export const TodoItem = forwardRef<HTMLDivElement, TodoItemProps>(
               type="text"
               value={editText}
               onChange={(e) => setEditText(e.target.value)}
-              onBlur={handleSave} // Save on blur
+              onBlur={handleSave}
               onKeyDown={handleKeyDown}
-              className="flex-grow h-8 text-sm border-0 border-b border-border focus-visible:ring-0 px-0 rounded-none"
+              className="flex-grow h-8 text-sm border-0 border-b border-border/50 focus-visible:ring-0 px-0 rounded-none bg-transparent"
             />
           ) : (
             <Label
               htmlFor={`todo-${todo.id}`}
               className={cn(
-                "flex-grow cursor-pointer text-sm",
-                todo.completed &&
-                  "text-muted-foreground dark:text-muted-foreground line-through"
+                "flex-grow cursor-pointer text-sm transition-colors duration-200",
+                todo.completed && "text-muted-foreground line-through"
               )}
-              onDoubleClick={handleEdit} // Edit on double click
+              onDoubleClick={handleEdit}
             >
               {todo.text}
             </Label>
@@ -159,16 +157,14 @@ export const TodoItem = forwardRef<HTMLDivElement, TodoItemProps>(
           {!isEditing && (
             <div
               className={cn(
-                "flex gap-1 transition-opacity",
-                isFocused
-                  ? "opacity-100"
-                  : "opacity-100 md:opacity-0 md:group-hover:opacity-100" // Show on focus or hover (on md+)
+                "flex gap-1.5 transition-opacity duration-200",
+                isFocused ? "opacity-100" : "opacity-0 group-hover:opacity-100"
               )}
             >
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-6 w-6 ml-auto text-muted-foreground hover:text-foreground"
+                className="h-7 w-7 text-muted-foreground hover:text-foreground hover:bg-muted/50"
                 onClick={handleEdit}
                 aria-label={`Edit ${todo.text}`}
               >
@@ -177,7 +173,7 @@ export const TodoItem = forwardRef<HTMLDivElement, TodoItemProps>(
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-6 w-6 text-muted-foreground hover:text-destructive"
+                className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                 onClick={() => onRemove(todo.id)}
                 aria-label={`Delete ${todo.text}`}
               >
@@ -187,16 +183,14 @@ export const TodoItem = forwardRef<HTMLDivElement, TodoItemProps>(
           )}
         </div>
         {todo.date && (
-          <div className="flex items-center gap-3 ml-7 text-xs text-muted-foreground">
-            {todo.date && (
-              <span className="flex items-center gap-1">
-                <CalendarDays className="h-3 w-3" />
-                {formatRelative(
-                  parseISO(todo.time ? `${todo.date}T${todo.time}` : todo.date),
-                  new Date()
-                )}
-              </span>
-            )}
+          <div className="flex items-center gap-2 ml-7 text-xs text-muted-foreground">
+            <span className="flex items-center gap-1.5">
+              <CalendarDays className="h-3 w-3" />
+              {formatRelative(
+                parseISO(todo.time ? `${todo.date}T${todo.time}` : todo.date),
+                new Date()
+              )}
+            </span>
           </div>
         )}
       </div>
