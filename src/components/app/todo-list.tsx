@@ -25,7 +25,7 @@ export function TodoList({ todos, onToggle, onRemove, onEdit }: TodoListProps) {
   }
 
   return (
-    <ScrollArea className="h-full">
+    <ScrollArea className="h-full -mr-4 pr-4">
       <div className="space-y-0">
         {/* Active todos */}
         {activeTodos.map((todo) => (

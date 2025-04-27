@@ -111,7 +111,7 @@ export function AddTodoForm({ onAdd }: AddTodoFormProps) {
               "Notification permission not granted, cannot show reminder."
             );
           }
-        }, delay);
+        }, 0);
       } else {
         console.log("Scheduled time is in the past, not setting notification.");
       }
