@@ -11,7 +11,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 
 // Define type for chrono results for clarity
@@ -111,7 +110,7 @@ export function AddTodoForm({ onAdd }: AddTodoFormProps) {
               "Notification permission not granted, cannot show reminder."
             );
           }
-        }, 0);
+        }, delay);
       } else {
         console.log("Scheduled time is in the past, not setting notification.");
       }
@@ -172,7 +171,9 @@ export function AddTodoForm({ onAdd }: AddTodoFormProps) {
         // Construct HTML with highlight span
         newHtml =
           escapeHtml(currentText.substring(0, startIndex)) +
-          `<span class="text-blue-600">${escapeHtml(firstResult.text)}</span>` +
+          `<span class="text-blue-700 dark:text-blue-400">${escapeHtml(
+            firstResult.text
+          )}</span>` +
           escapeHtml(currentText.substring(endIndex));
       }
     }
@@ -200,9 +201,6 @@ export function AddTodoForm({ onAdd }: AddTodoFormProps) {
     <div className="space-y-4">
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="flex flex-col gap-2">
-          <Label htmlFor="todo-input" className="text-sm font-medium">
-            Add a new task
-          </Label>
           <div className="flex gap-2">
             <div
               ref={contentEditableRef}

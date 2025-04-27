@@ -53,7 +53,7 @@ export function TodoItem({ todo, onToggle, onRemove, onEdit }: TodoItemProps) {
   };
 
   return (
-    <div className="group flex flex-col gap-1 py-3 border-b border-gray-100 dark:border-gray-800 last:border-0">
+    <div className="group flex flex-col gap-1 py-3 border-b border-border last:border-0">
       <div className="flex items-center gap-3">
         <Checkbox
           id={`todo-${todo.id}`}
@@ -72,14 +72,15 @@ export function TodoItem({ todo, onToggle, onRemove, onEdit }: TodoItemProps) {
             onChange={(e) => setEditText(e.target.value)}
             onBlur={handleSave} // Save on blur
             onKeyDown={handleKeyDown}
-            className="flex-grow h-8 text-sm border-0 border-b focus-visible:ring-0 px-0 rounded-none"
+            className="flex-grow h-8 text-sm border-0 border-b border-border focus-visible:ring-0 px-0 rounded-none"
           />
         ) : (
           <Label
             htmlFor={`todo-${todo.id}`}
             className={cn(
               "flex-grow cursor-pointer text-sm",
-              todo.completed && "text-gray-400 dark:text-gray-600 line-through"
+              todo.completed &&
+                "text-muted-foreground dark:text-muted-foreground line-through"
             )}
             onDoubleClick={handleEdit} // Edit on double click
           >
@@ -87,11 +88,11 @@ export function TodoItem({ todo, onToggle, onRemove, onEdit }: TodoItemProps) {
           </Label>
         )}
         {!isEditing && (
-          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="flex gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
             <Button
               variant="ghost"
               size="icon"
-              className="h-6 w-6 ml-auto text-gray-400 hover:text-gray-600"
+              className="h-6 w-6 ml-auto text-muted-foreground hover:text-foreground"
               onClick={handleEdit}
               aria-label={`Edit ${todo.text}`}
             >
@@ -100,7 +101,7 @@ export function TodoItem({ todo, onToggle, onRemove, onEdit }: TodoItemProps) {
             <Button
               variant="ghost"
               size="icon"
-              className="h-6 w-6 text-gray-400 hover:text-red-600"
+              className="h-6 w-6 text-muted-foreground hover:text-destructive"
               onClick={() => onRemove(todo.id)}
               aria-label={`Delete ${todo.text}`}
             >
@@ -110,7 +111,7 @@ export function TodoItem({ todo, onToggle, onRemove, onEdit }: TodoItemProps) {
         )}
       </div>
       {(todo.date || todo.time) && (
-        <div className="flex items-center gap-3 pl-[34px] text-xs text-gray-400">
+        <div className="flex items-center gap-3 pl-[34px] text-xs text-muted-foreground">
           {todo.date && (
             <span className="flex items-center gap-1">
               <CalendarDays className="h-3 w-3" />

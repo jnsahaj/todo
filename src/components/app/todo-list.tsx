@@ -21,7 +21,7 @@ export function TodoList({ todos, onToggle, onRemove, onEdit }: TodoListProps) {
   const completedTodos = todos.filter((todo) => todo.completed);
 
   if (todos.length === 0) {
-    return <p className="text-gray-400 text-sm">No tasks yet.</p>;
+    return <p className="text-muted-foreground text-sm">No tasks yet.</p>;
   }
 
   return (
@@ -47,7 +47,7 @@ export function TodoList({ todos, onToggle, onRemove, onEdit }: TodoListProps) {
             defaultValue="completed"
           >
             <AccordionItem value="completed">
-              <AccordionTrigger className="text-sm text-gray-400">
+              <AccordionTrigger className="text-sm text-muted-foreground">
                 Completed ({completedTodos.length})
               </AccordionTrigger>
               <AccordionContent>
