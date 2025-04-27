@@ -146,3 +146,10 @@
 .animate-accordion-up {
   animation: accordion-up 0.2s ease-out;
 }
+
+/* Add highlight style for detected date/time */
+::highlight(chrono-datetime) {
+  @apply text-blue-500 dark:text-blue-400 rounded px-0.5;
+  /* You can add other styles like text color if needed */
+  /* color: black; */
+}

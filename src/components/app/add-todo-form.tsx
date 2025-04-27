@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon, Plus, Clock } from "lucide-react";
 import * as chrono from "chrono-node";
 
 import { cn } from "@/lib/utils";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -12,12 +11,21 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 
 // Define type for chrono results for clarity
 type ChronoResult = ReturnType<typeof chrono.parse>[0];
+
+// Helper function to escape HTML characters
+function escapeHtml(unsafe: string): string {
+  return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
 
 interface AddTodoFormProps {
   onAdd: (text: string, date?: string, time?: string) => void;
@@ -33,6 +41,7 @@ export function AddTodoForm({ onAdd }: AddTodoFormProps) {
     useState<ChronoResult | null>(null);
   const [userInteractedWithPickers, setUserInteractedWithPickers] =
     useState(false);
+  const contentEditableRef = useRef<HTMLDivElement>(null);
 
   // Effect to parse text whenever it changes
   useEffect(() => {
@@ -42,14 +51,20 @@ export function AddTodoForm({ onAdd }: AddTodoFormProps) {
 
     if (firstResult && !userInteractedWithPickers) {
       const startDate = firstResult.start.date();
-      setDate(startDate); // Pre-fill date picker
+      setDate(startDate);
 
-      // Pre-fill time picker if time components are known
       if (firstResult.start.isCertain("hour")) {
         setTime(format(startDate, "HH:mm"));
       }
+    } else if (!firstResult) {
+      // If no result, ensure date/time derived from text are cleared
+      // but only if the user hasn't manually set them
+      if (!userInteractedWithPickers) {
+        setDate(undefined);
+        setTime("");
+      }
     }
-  }, [text, userInteractedWithPickers]); // Re-run when text changes
+  }, [text, userInteractedWithPickers]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,51 +82,101 @@ export function AddTodoForm({ onAdd }: AddTodoFormProps) {
       if (parsedChronoResult.start.isCertain("hour")) {
         finalTime = format(finalDate, "HH:mm");
       }
-      // Remove the detected datetime from the text
       finalText = text.replace(parsedChronoResult.text, "").trim();
     }
 
     const formattedDate = finalDate
       ? format(finalDate, "yyyy-MM-dd")
       : undefined;
-    onAdd(finalText, formattedDate, finalTime); // Pass cleaned text
+    onAdd(finalText, formattedDate, finalTime);
 
-    // Reset state
     setText("");
     setDate(undefined);
     setTime("");
     setParsedChronoResult(null);
-    setUserInteractedWithPickers(false); // Reset interaction flag
+    setUserInteractedWithPickers(false);
     setIsCalendarOpen(false);
     setIsTimePickerOpen(false);
+
+    if (contentEditableRef.current) {
+      contentEditableRef.current.innerHTML = "";
+    }
   };
 
   const handleDateSelect = (selectedDate: Date | undefined) => {
-    setUserInteractedWithPickers(true); // Mark interaction
+    setUserInteractedWithPickers(true);
     setDate(selectedDate);
     setIsCalendarOpen(false);
   };
 
   const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setUserInteractedWithPickers(true); // Mark interaction
+    setUserInteractedWithPickers(true);
     setTime(e.target.value);
   };
 
+  const handleContentChange = (e: React.FormEvent<HTMLDivElement>) => {
+    const div = e.currentTarget;
+    const currentText = div.textContent || "";
+    setText(currentText); // Update state
+
+    // Parse the plain text
+    const results = chrono.parse(currentText);
+    const firstResult = results.length > 0 ? results[0] : null;
+    setParsedChronoResult(firstResult); // Update state
+
+    let newHtml = escapeHtml(currentText); // Default to escaped plain text
+    let domChanged = false;
+
+    if (firstResult) {
+      const startIndex = currentText.indexOf(firstResult.text);
+      if (startIndex !== -1) {
+        const endIndex = startIndex + firstResult.text.length;
+        // Construct HTML with highlight span
+        newHtml =
+          escapeHtml(currentText.substring(0, startIndex)) +
+          `<span class="text-blue-600">${escapeHtml(firstResult.text)}</span>` +
+          escapeHtml(currentText.substring(endIndex));
+      }
+    }
+
+    // Only update DOM if HTML needs to change, to avoid cursor jumps
+    if (div.innerHTML !== newHtml) {
+      div.innerHTML = newHtml;
+      domChanged = true;
+    }
+
+    // Restore cursor to end ONLY if DOM changed
+    if (domChanged) {
+      const selection = window.getSelection();
+      if (selection && div) {
+        const range = document.createRange();
+        range.selectNodeContents(div);
+        range.collapse(false); // false collapses to the end
+        selection.removeAllRanges();
+        selection.addRange(range);
+      }
+    }
+  };
+
   return (
-    <Card className="p-4">
+    <div className="space-y-4">
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="flex flex-col gap-2">
           <Label htmlFor="todo-input" className="text-sm font-medium">
             Add a new task
           </Label>
           <div className="flex gap-2">
-            <Input
+            <div
+              ref={contentEditableRef}
+              contentEditable
               id="todo-input"
-              type="text"
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              placeholder="What needs to be done?"
-              className="flex-grow"
+              onInput={handleContentChange}
+              data-placeholder="What needs to be done?"
+              className={cn(
+                "flex-grow min-h-[40px] px-3 py-2 rounded-md border border-input bg-background text-sm ring-offset-background",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                "empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground"
+              )}
             />
             <div className="flex gap-1">
               <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
@@ -156,11 +221,11 @@ export function AddTodoForm({ onAdd }: AddTodoFormProps) {
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-3" align="end">
-                  <Input
+                  <input
                     type="time"
                     value={time}
                     onChange={handleTimeChange}
-                    className="w-[120px]"
+                    className="w-[120px] rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
                   />
                 </PopoverContent>
               </Popover>
@@ -181,12 +246,7 @@ export function AddTodoForm({ onAdd }: AddTodoFormProps) {
           <div className="flex flex-wrap gap-2">
             {parsedChronoResult && (
               <Badge variant="outline" className="text-xs">
-                Detected: {parsedChronoResult.text} (
-                {format(parsedChronoResult.start.date(), "MMM d, yyyy") +
-                  (parsedChronoResult.start.isCertain("hour")
-                    ? " " + format(parsedChronoResult.start.date(), "HH:mm")
-                    : "")}
-                )
+                Detected: {parsedChronoResult.text}
               </Badge>
             )}
             {date && (
@@ -204,6 +264,6 @@ export function AddTodoForm({ onAdd }: AddTodoFormProps) {
           </div>
         )}
       </form>
-    </Card>
+    </div>
   );
 }
