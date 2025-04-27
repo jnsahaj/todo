@@ -171,6 +171,7 @@ export function AddTodoForm({ onAdd }: AddTodoFormProps) {
               contentEditable
               id="todo-input"
               onInput={handleContentChange}
+              onKeyDown={handleKeyDown}
               data-placeholder="What needs to be done?"
               className={cn(
                 "flex-grow min-h-[40px] px-3 py-2 rounded-md border border-input bg-background text-sm ring-offset-background",
