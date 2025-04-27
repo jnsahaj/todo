@@ -12,6 +12,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Card } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 
 // Define type for chrono results for clarity
 type ChronoResult = ReturnType<typeof chrono.parse>[0];
@@ -54,6 +57,7 @@ export function AddTodoForm({ onAdd }: AddTodoFormProps) {
 
     let finalDate: Date | undefined = undefined;
     let finalTime: string | undefined = undefined;
+    let finalText = text;
 
     if (userInteractedWithPickers) {
       finalDate = date;
@@ -63,12 +67,14 @@ export function AddTodoForm({ onAdd }: AddTodoFormProps) {
       if (parsedChronoResult.start.isCertain("hour")) {
         finalTime = format(finalDate, "HH:mm");
       }
+      // Remove the detected datetime from the text
+      finalText = text.replace(parsedChronoResult.text, "").trim();
     }
 
     const formattedDate = finalDate
       ? format(finalDate, "yyyy-MM-dd")
       : undefined;
-    onAdd(text, formattedDate, finalTime); // Pass original text
+    onAdd(finalText, formattedDate, finalTime); // Pass cleaned text
 
     // Reset state
     setText("");
@@ -92,99 +98,112 @@ export function AddTodoForm({ onAdd }: AddTodoFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-2">
-      <div className="flex gap-2 items-center border-t pt-4 border-gray-100 dark:border-gray-800">
-        <Input
-          type="text"
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder="Add a task"
-          className="flex-grow border-0 focus-visible:ring-0 px-0 text-sm placeholder:text-gray-400"
-        />
-        <div className="flex gap-1">
-          <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
-            <PopoverTrigger asChild>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className={cn(
-                  "h-8 w-8",
-                  date && "text-gray-700 dark:text-gray-300"
-                )}
-                onClick={() => setIsCalendarOpen(true)}
-              >
-                <CalendarIcon className="h-4 w-4" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0">
-              <Calendar
-                mode="single"
-                selected={date}
-                onSelect={handleDateSelect}
-                initialFocus
-              />
-            </PopoverContent>
-          </Popover>
+    <Card className="p-4">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="todo-input" className="text-sm font-medium">
+            Add a new task
+          </Label>
+          <div className="flex gap-2">
+            <Input
+              id="todo-input"
+              type="text"
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              placeholder="What needs to be done?"
+              className="flex-grow"
+            />
+            <div className="flex gap-1">
+              <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className={cn(
+                      "h-10 w-10",
+                      date && "bg-accent text-accent-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="h-4 w-4" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="end">
+                  <Calendar
+                    mode="single"
+                    selected={date}
+                    onSelect={handleDateSelect}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
 
-          <Popover open={isTimePickerOpen} onOpenChange={setIsTimePickerOpen}>
-            <PopoverTrigger asChild>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className={cn(
-                  "h-8 w-8",
-                  time && "text-gray-700 dark:text-gray-300"
-                )}
+              <Popover
+                open={isTimePickerOpen}
+                onOpenChange={setIsTimePickerOpen}
               >
-                <Clock className="h-4 w-4" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-3">
-              <Input
-                type="time"
-                value={time}
-                onChange={handleTimeChange}
-                className="w-[120px] h-8 text-sm"
-              />
-            </PopoverContent>
-          </Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className={cn(
+                      "h-10 w-10",
+                      time && "bg-accent text-accent-foreground"
+                    )}
+                  >
+                    <Clock className="h-4 w-4" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-3" align="end">
+                  <Input
+                    type="time"
+                    value={time}
+                    onChange={handleTimeChange}
+                    className="w-[120px]"
+                  />
+                </PopoverContent>
+              </Popover>
 
-          <Button
-            type="submit"
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
-          >
-            <Plus className="h-4 w-4" />
-          </Button>
+              <Button
+                type="submit"
+                size="icon"
+                className="h-10 w-10"
+                disabled={!text.trim()}
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
         </div>
-      </div>
-      {parsedChronoResult && (
-        <div className="text-xs text-gray-400 pl-1">
-          Detected: {parsedChronoResult.text} (
-          {format(parsedChronoResult.start.date(), "MMM d, yyyy") +
-            (parsedChronoResult.start.isCertain("hour")
-              ? " " + format(parsedChronoResult.start.date(), "HH:mm")
-              : "")}
-          )
-        </div>
-      )}
-      {date && (
-        <div className="flex items-center text-xs text-gray-400 pl-1 gap-2">
-          <span className="flex items-center gap-1">
-            <CalendarIcon className="h-3 w-3" />
-            {format(date, "MMM d, yyyy")}
-          </span>
-          {time && (
-            <span className="flex items-center gap-1">
-              <Clock className="h-3 w-3" />
-              {time}
-            </span>
-          )}
-        </div>
-      )}
-    </form>
+
+        {(parsedChronoResult || date) && (
+          <div className="flex flex-wrap gap-2">
+            {parsedChronoResult && (
+              <Badge variant="outline" className="text-xs">
+                Detected: {parsedChronoResult.text} (
+                {format(parsedChronoResult.start.date(), "MMM d, yyyy") +
+                  (parsedChronoResult.start.isCertain("hour")
+                    ? " " + format(parsedChronoResult.start.date(), "HH:mm")
+                    : "")}
+                )
+              </Badge>
+            )}
+            {date && (
+              <Badge variant="secondary" className="text-xs">
+                <CalendarIcon className="mr-1 h-3 w-3" />
+                {format(date, "MMM d, yyyy")}
+                {time && (
+                  <>
+                    <Clock className="ml-1 mr-1 h-3 w-3" />
+                    {time}
+                  </>
+                )}
+              </Badge>
+            )}
+          </div>
+        )}
+      </form>
+    </Card>
   );
 }

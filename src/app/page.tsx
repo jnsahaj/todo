@@ -13,11 +13,8 @@ export default function Home() {
   const editTodo = useTodoStore((state) => state.editTodo);
 
   return (
-    <main className="container mx-auto max-w-xl py-12 px-4 flex flex-col min-h-screen">
-      <h1 className="text-xl font-normal text-left mb-8 text-gray-700 dark:text-gray-300">
-        Tasks
-      </h1>
-      <div className="flex-grow mb-8">
+    <main className="container mx-auto max-w-xl h-screen flex flex-col">
+      <div className="flex-1 min-h-0 p-4">
         <TodoList
           todos={todos}
           onToggle={toggleTodo}
@@ -25,7 +22,7 @@ export default function Home() {
           onEdit={editTodo}
         />
       </div>
-      <div className="mt-auto">
+      <div className="px-4 pb-12">
         <AddTodoForm onAdd={addTodo} />
       </div>
     </main>
