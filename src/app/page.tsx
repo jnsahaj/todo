@@ -74,7 +74,7 @@ export default function Home() {
             setFocusedIndex={setFocusedIndex}
           />
         </div>
-        <div className="px-4 pb-12">
+        <div className="px-4 pb-8">
           <AddTodoForm ref={addTodoFormRef} onAdd={addTodo} />
         </div>
       </main>

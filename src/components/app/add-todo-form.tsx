@@ -294,31 +294,29 @@ export const AddTodoForm = forwardRef<{ focus: () => void }, AddTodoFormProps>(
             </div>
           </div>
 
-          {(parsedChronoResult ||
-            (date && time) ||
-            (date && !time) ||
-            (!date && time)) && (
-            <div className="flex flex-wrap gap-2 items-center text-xs text-muted-foreground">
-              <span>Set for:</span>
-              {parsedChronoResult && (
-                <Badge variant="outline" className="text-xs">
-                  Detected: {parsedChronoResult.text}
-                </Badge>
-              )}
-              {date && (
-                <Badge variant="secondary" className="text-xs">
-                  <CalendarIcon className="mr-1 h-3 w-3" />
-                  {format(date, "MMM d, yyyy")}
-                  {time && (
-                    <>
-                      <Clock className="ml-1 mr-1 h-3 w-3" />
-                      {time}
-                    </>
-                  )}
-                </Badge>
-              )}
-            </div>
-          )}
+          {/* Reserve space for the badge section to prevent layout shift */}
+          <div className="flex flex-wrap gap-2 items-center text-xs text-muted-foreground min-h-[20px]">
+            {(parsedChronoResult ||
+              (date && time) ||
+              (date && !time) ||
+              (!date && time)) && (
+              <>
+                <span>Set for:</span>
+                {date && (
+                  <Badge variant="secondary" className="text-xs">
+                    <CalendarIcon className="mr-1 h-3 w-3" />
+                    {format(date, "MMM d, yyyy")}
+                    {time && (
+                      <>
+                        <Clock className="ml-1 mr-1 h-3 w-3" />
+                        {time}
+                      </>
+                    )}
+                  </Badge>
+                )}
+              </>
+            )}
+          </div>
         </form>
       </div>
     );
