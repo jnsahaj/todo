@@ -40,7 +40,12 @@ export function TodoList({ todos, onToggle, onRemove, onEdit }: TodoListProps) {
 
         {/* Completed todos in accordion */}
         {completedTodos.length > 0 && (
-          <Accordion type="single" collapsible className="w-full">
+          <Accordion
+            type="single"
+            collapsible
+            className="w-full"
+            defaultValue="completed"
+          >
             <AccordionItem value="completed">
               <AccordionTrigger className="text-sm text-gray-400">
                 Completed ({completedTodos.length})
