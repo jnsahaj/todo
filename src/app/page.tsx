@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useTodoStore } from "@/store/todo-store";
 import { AddTodoForm } from "@/components/app/add-todo-form";
 import { TodoList } from "@/components/app/todo-list";
@@ -8,6 +8,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import Link from "next/link";
 import Github from "@/assets/github.svg";
 import { Button } from "@/components/ui/button";
+import { keyboardShortcuts } from "@/lib/keyboard-shortcuts";
 
 export default function Home() {
   const todos = useTodoStore((state) => state.todos);
@@ -15,6 +16,8 @@ export default function Home() {
   const toggleTodo = useTodoStore((state) => state.toggleTodo);
   const removeTodo = useTodoStore((state) => state.removeTodo);
   const editTodo = useTodoStore((state) => state.editTodo);
+  const addTodoFormRef = useRef<{ focus: () => void }>(null);
+  const [focusedIndex, setFocusedIndex] = useState(-1);
 
   // Request notification permission on mount
   useEffect(() => {
@@ -27,6 +30,23 @@ export default function Home() {
         }
       });
     }
+  }, []);
+
+  useEffect(() => {
+    keyboardShortcuts.registerShortcut("focus-todo-input", {
+      key: "k",
+      modifiers: ["Meta"],
+      action: () => {
+        setFocusedIndex(-1);
+        addTodoFormRef.current?.focus();
+      },
+      description: "Focus the todo input field",
+    });
+
+    // Cleanup on unmount
+    return () => {
+      keyboardShortcuts.unregisterShortcut("focus-todo-input");
+    };
   }, []);
 
   return (
@@ -50,10 +70,12 @@ export default function Home() {
             onToggle={toggleTodo}
             onRemove={removeTodo}
             onEdit={editTodo}
+            focusedIndex={focusedIndex}
+            setFocusedIndex={setFocusedIndex}
           />
         </div>
         <div className="px-4 pb-12">
-          <AddTodoForm onAdd={addTodo} />
+          <AddTodoForm ref={addTodoFormRef} onAdd={addTodo} />
         </div>
       </main>
     </div>
