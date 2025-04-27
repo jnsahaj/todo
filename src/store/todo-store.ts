@@ -17,30 +17,11 @@ interface TodoState {
   editTodo: (id: string, newText: string) => void;
 }
 
-const requestNotificationPermissionIfNeeded = () => {
-  if (
-    typeof window !== "undefined" &&
-    "Notification" in window &&
-    Notification.permission === "default"
-  ) {
-    Notification.requestPermission().then((permission) => {
-      if (permission === "granted") {
-        console.log("Notification permission granted.");
-      } else {
-        console.log("Notification permission denied.");
-      }
-    });
-  }
-};
-
 export const useTodoStore = create<TodoState>()(
   persist(
     (set) => ({
       todos: [],
-      addTodo: (text, date, time) => {
-        if (date || time) {
-          requestNotificationPermissionIfNeeded();
-        }
+      addTodo: (text, date, time) =>
         set((state) => ({
           todos: [
             ...state.todos,
@@ -52,8 +33,7 @@ export const useTodoStore = create<TodoState>()(
               time,
             },
           ],
-        }));
-      },
+        })),
       toggleTodo: (id) =>
         set((state) => ({
           todos: state.todos.map((todo) =>
