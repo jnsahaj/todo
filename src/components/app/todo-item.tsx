@@ -5,8 +5,8 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils"; // For conditional classes
-import { format, parseISO } from "date-fns";
-import { CalendarDays, Clock, Pencil, Trash2 } from "lucide-react";
+import { parseISO, formatRelative } from "date-fns"; // <-- Import formatRelative
+import { CalendarDays, Pencil, Trash2 } from "lucide-react";
 import { keyboardShortcuts } from "@/lib/keyboard-shortcuts"; // Import keyboard shortcuts manager
 
 interface TodoItemProps {
@@ -119,7 +119,7 @@ export const TodoItem = forwardRef<HTMLDivElement, TodoItemProps>(
         tabIndex={-1} // Make it focusable
         onClick={onFocusRequested} // Request focus on click
         className={cn(
-          "group flex flex-col gap-1 py-3 border-b border-border last:border-0 focus:outline-none focus:ring-1 focus:ring-ring/30 rounded-sm -mx-1 px-4", // Basic focus styles
+          "group flex flex-col gap-1 py-3 border-b border-border last:border-0 focus:outline-none rounded-sm -mx-1 px-4", // Basic focus styles
           isFocused && "bg-muted/50" // Highlight when programmatically focused
         )}
       >
@@ -186,18 +186,15 @@ export const TodoItem = forwardRef<HTMLDivElement, TodoItemProps>(
             </div>
           )}
         </div>
-        {(todo.date || todo.time) && (
-          <div className="flex items-center gap-3 pl-[34px] text-xs text-muted-foreground">
+        {todo.date && (
+          <div className="flex items-center gap-3 ml-7 text-xs text-muted-foreground">
             {todo.date && (
               <span className="flex items-center gap-1">
                 <CalendarDays className="h-3 w-3" />
-                {format(parseISO(todo.date), "MMM d, yyyy")}
-              </span>
-            )}
-            {todo.time && (
-              <span className="flex items-center gap-1">
-                <Clock className="h-3 w-3" />
-                {todo.time}
+                {formatRelative(
+                  parseISO(todo.time ? `${todo.date}T${todo.time}` : todo.date),
+                  new Date()
+                )}
               </span>
             )}
           </div>
